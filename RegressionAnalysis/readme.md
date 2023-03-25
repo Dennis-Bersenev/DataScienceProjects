@@ -1,0 +1,1 @@
+Implementation of various regression models in R using a toy dataset, short interpretation of results is provided in the source files.

@@ -1,0 +1,1 @@
+R script that first runs through the standard Seurat pipeline to determine highly variable genes (HVGs) for downstream analysis, and then performs statistical tests to provide insight on FCGR3A gene expression in different cell types. 

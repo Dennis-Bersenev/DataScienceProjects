@@ -1,0 +1,92 @@
+```{r setup}
+library("readxl")
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+```
+
+
+Loading in and preprocessing the data
+```{r}
+d<-read_excel("hw-data.xlsx", sheet=2) 
+d$cond <- as.factor(d$cond)
+d$type <- as.factor(d$type)
+# d$cell <- as.factor(d$cond)
+```
+
+1. Linear Regression
+```{r}
+model_g1 = lm(formula = g1 ~ cond+type, data = d)
+summary(model_g1)
+```
+```{r}
+model_g2 = lm(formula = g2 ~ cond+type, data = d)
+summary(model_g2)
+```
+2. Creating plots for all the residuals
+```{r}
+plot(d$cond, resid(model_g1), type="p", ylab="Residuals", xlab="cond levels", main="g1: Residuals vs Cond")
+# ggplot(d, aes(x=cond, y=resid(model_g2))) + geom_point()
+```
+```{r}
+plot(d$type, resid(model_g1), type="p", ylab="Residuals", xlab="type levels", main="g1: Residuals vs Type")
+```
+```{r}
+plot(d$cond, resid(model_g2), type="p", ylab="Residuals", xlab="cond levels", main="g2: Residuals vs Cond")
+```
+```{r}
+plot(d$type, resid(model_g2), type="p", ylab="Residuals", xlab="type levels", main="g2: Residuals vs Type")
+```
+3. More linear regression
+```{r}
+ext_model_g1 = lm(formula = g1 ~ cond+type+g2, data = d)
+summary(ext_model_g1)
+```
+4. Logistic Regression
+```{r}
+model_type_g1 = glm(formula = type ~ cond+g1, family = binomial("logit"), data = d)
+summary(model_type_g1)
+```
+```{r}
+model_type_g2 = glm(formula = type ~ cond+g2, family = binomial("logit"), data = d)
+summary(model_type_g2)
+```
+
+```{r}
+# newdata2$Predict <- ifelse(model_type_g1$fitted.values >0.5,"ct2","ct1")
+full<-glm(formula = type ~ cond+g1+g2, family = binomial("logit"), data = d)
+```
+```{r}
+full_preds<-full$fitted.values
+#Rows 11-19 are 1.0, and rows 1-10 are basically 0
+#Which means the fitted values are showing Pr(Type=ct2)
+```
+
+Comparing predictions to actual: does the model get the right cell type?
+```{r}
+g1_preds<- model_type_g1$fitted.values
+g2_preds<- model_type_g2$fitted.values
+#All probs over 0.5 get classified as ct2, others as ct1, report the accuracy by comparing to full!
+temp1<-(ifelse(full_preds > 0.5,"ct2","ct1") == ifelse(g1_preds > 0.5,"ct2","ct1"))
+g1_accuracy<-length(temp1[temp1==TRUE])/length(full_preds)
+
+temp2<-(ifelse(full_preds > 0.5,"ct2","ct1") == ifelse(g2_preds > 0.5,"ct2","ct1"))
+g2_accuracy<-length(temp2[temp2==TRUE])/length(full_preds)
+```
+
+5. Finding Pearson Correlation Coefficients between g1 and g2
+```{r}
+summary(lm(formula = g1~g2, data = d))
+```
+```{r}
+summary(lm(formula = g2~g1, data = d))
+```
+```{r}
+cor(d$g1, d$g2)
+```
+6. Calculating the residuals and their correlations from [1]
+```{r}
+# Gonna assume it means the residuals of the two models compared against each other
+cor(model_g1$residuals, model_g2$residuals)
+```
+

@@ -1,0 +1,41 @@
+```{r setup}
+library("readxl")
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(MASS)
+```
+
+
+Loading in and preprocessing the data
+```{r}
+d<-read_excel("hw-data.xlsx", sheet=3) 
+```
+
+1. Poisson Regression
+```{r}
+p_model<-glm(formula=cell~cond+offset(log(total)), family = poisson(link = "log"), data=d)
+summary(p_model)
+```
+2. Negative Binomial Regression
+```{r}
+nb_model<-glm.nb(formula=cell~cond+offset(log(total)), data=d)
+summary(nb_model)
+```
+3. Comparing Mean to Variance in Analyzing dispersion
+```{r}
+mean(d$cell)
+var(d$cell)
+
+```
+Clearly Variance is in well excess of the mean, implying the data is overdispersed.
+
+4. Binomial Regression
+```{r}
+ratios <- d$cell/d$total #Of cells for each mouse that belong to the cell type
+d$ratios <- ratios
+b_model <- glm(formula=ratios~cond, family="binomial", data=d, offset = log(total))
+summary(b_model)
+
+```
+

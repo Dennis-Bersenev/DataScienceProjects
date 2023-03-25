@@ -1,0 +1,57 @@
+```{r setup}
+library("readxl")
+
+```
+
+
+Loading in the data
+```{r}
+data<-read_excel("hw-data.xlsx", sheet=1) 
+
+```
+
+
+Set up the data frame for the ANOVA test
+```{r}
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+# The simplest and easiest thing you do is just coerce the data to exist as a two col table
+# - One col has all the data, call it y = the response
+# - Other col is the factor and indicates which level the obs belongs to
+
+
+dfA=rep("A", nrow(data[,"A"]))
+dfB=rep("B", nrow(data[,"B"]))
+dfC=rep("C", nrow(data[,"C"]))
+dfD=rep("D", nrow(data[,"D"]))
+
+
+l1 <- data[,"A"]
+l2 <- data[,"B"]
+l3 <- data[,"C"]
+l4 <- data[,"D"]
+
+df <- data.frame(
+  y = c(l1$A, l2$B, l3$C, l4$D),
+  lvl = c(dfA, dfB, dfC, dfD)
+)
+
+df$lvl <- as.factor(df$lvl)
+group_by(df, lvl) %>%
+  summarise(
+    count = n(),
+    mean = mean(y, na.rm = TRUE),
+    sd = sd(y, na.rm = TRUE)
+  )
+
+```
+
+Run the One-Way ANOVA test on the df
+```{r}
+# Compute the analysis of variance
+res.aov <- aov(y ~ lvl, data = df)
+# Summary of the analysis
+summary(res.aov)
+```
+
